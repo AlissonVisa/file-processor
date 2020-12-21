@@ -10,10 +10,11 @@ rabbitmq porta padrão (usando docker)
 cassandra porta padrão (usando docker)
 ```
 
-## Rodar os serviços 
-    * batch-file-chunk-workder (quantas instancias quiser, quanto mais melhor será a performance)
-    * batch-file-reader (somente 1 instancia, definir a variável de ambiente "HOME_PATH" na linha de comando, dentro desse caminho deve haver uma pasta /data/in com os arquivos de input)
-    * salesman-api (quantas instancias quiser para escalar)
+## Rodar os serviços
+
+* batch-file-chunk-workder (quantas instancias quiser, quanto mais melhor será a performance)
+* batch-file-reader (somente 1 instancia, definir a variável de ambiente "HOME_PATH" na linha de comando, dentro desse caminho deve haver uma pasta /data/in com os arquivos de input)
+* salesman-api (quantas instancias quiser para escalar)
 
 Na raiz de cada projeto execute:
 
@@ -27,7 +28,7 @@ Para definir variável de ambiente execute:
 mvn spring-boot:run -DHOME_PATH=/YOUR/HOME/PATH/DIR/
 ```
 
-##Melhorias
+## Melhorias
 
 * Implementar as regras de negócio de clientes e vendas
 * Cada contexto de negócio na sua aplicação
