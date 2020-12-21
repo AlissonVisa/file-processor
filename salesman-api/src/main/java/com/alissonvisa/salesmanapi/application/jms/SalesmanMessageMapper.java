@@ -17,11 +17,15 @@ public class SalesmanMessageMapper implements MessageDomainMapper<Salesman> {
     public Salesman map(String message) {
         String[] elements = getMessageElements(message);
         Salesman salesman = new Salesman(
-                elements[IMPORT_ARCHIVE],
-                elements[NAME],
+                restoreOriginalElement(IMPORT_ARCHIVE, elements),
+                restoreOriginalElement(NAME, elements),
                 elements[CPF],
                 new BigDecimal(elements[SALARY]));
         return salesman;
+    }
+
+    private String restoreOriginalElement(int importArchive, String[] elements) {
+        return elements[importArchive].replace("\u00E7\u00E7".toUpperCase(), "\u00E7");
     }
 
     private String[] getMessageElements(String message) {

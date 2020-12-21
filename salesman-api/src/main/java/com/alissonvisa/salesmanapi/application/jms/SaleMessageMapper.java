@@ -19,12 +19,19 @@ public class SaleMessageMapper implements MessageDomainMapper<Sale> {
     @Override
     public Sale map(String message)  {
         String[] elements = getMessageElements(message, delimiter());
-        Sale sale = new Sale(Long.valueOf(elements[SALE_ID]), elements[SALESMAN_NAME], elements[IMPORT_ARCHIVE]);
+        Sale sale = new Sale(Long.valueOf(
+                elements[SALE_ID]),
+                restoreOriginalElement(SALESMAN_NAME, elements),
+                restoreOriginalElement(IMPORT_ARCHIVE, elements));
         List<SaleItem> saleItems = new SaleItemMessageMapper().map(getSaleItemMessages(elements[SALE_ITEM_LIST]));
         saleItems.forEach((item) -> {
             sale.addSaleItem(item);
         });
         return sale;
+    }
+
+    private String restoreOriginalElement(int salesmanName, String[] elements) {
+        return elements[salesmanName].replace("\u00E7\u00E7".toUpperCase(), "\u00E7");
     }
 
     private String[] getMessageElements(String message, String delimiter) {

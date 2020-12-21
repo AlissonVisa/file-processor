@@ -14,10 +14,14 @@ public class RawLineMapper extends DefaultLineMapper<String> {
 
     @Override
     public String mapLine(String line, int lineNumber) {
-        return new String(line.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8) + concatArchive();
+        return getUtf8Line(line) + concatArchive();
+    }
+
+    private String getUtf8Line(String line) {
+        return new String(line.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
     }
 
     private String concatArchive() {
-        return "\u00E7" + importArchive;
+        return "\u00E7" + importArchive.toUpperCase();
     }
 }

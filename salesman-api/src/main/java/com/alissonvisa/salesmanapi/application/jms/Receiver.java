@@ -26,13 +26,13 @@ public class Receiver {
     @JmsListener(destination = SALESMAN_QUEUE)
     public void onReceiveSalesman(String message) {
         log.info("salesman received message='{}'", message);
-        salesmanService.create(new SalesmanMessageMapper().map(message));
+        salesmanService.create(new SalesmanMessageMapper().map(getCleanLine(message)));
     }
 
     @JmsListener(destination = SALES_QUEUE)
     public void onReceiveSale(String message) {
         log.info("sale received message='{}'", message);
-        final Sale sale = new SaleMessageMapper().map(message);
+        final Sale sale = new SaleMessageMapper().map(getCleanLine(message));
         // TODO save sale
     }
 
@@ -40,5 +40,9 @@ public class Receiver {
     public void onReceiveCustomer(String message) {
         log.info("customer received message='{}'", message);
         // TODO save customer
+    }
+
+    private String getCleanLine(String line) {
+        return line.replaceAll("\u00E7+([a-z])", "\u00E7\u00E7".toUpperCase() + "$1");
     }
 }

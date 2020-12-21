@@ -144,7 +144,7 @@ public class JobManagerConfiguration {
     @Bean
     public TaskletStep managerStep() {
         return this.managerStepBuilderFactory.get("managerStep")
-                .chunk(2)
+                .chunk(5)
                 .reader(sampleReader(WILL_BE_INJECTED))
                 .outputChannel(requests())
                 .inputChannel(replies())
