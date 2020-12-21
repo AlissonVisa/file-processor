@@ -32,6 +32,7 @@ mvn spring-boot:run -DHOME_PATH=/YOUR/HOME/PATH/DIR/
 
 * Implementar as regras de negócio de clientes e vendas
 * Cada contexto de negócio na sua aplicação
-* Dockerizar
-* Escalar via kubernetes
+* Aplicações em containers
+* Expor métricas com Actuator
+* Escalar via kubernetes observando métricas das filas
 * Testes
