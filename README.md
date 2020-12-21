@@ -6,7 +6,7 @@ Instalar na máquina:
 jdk-11 (usado openjdk zulu)
 maven 3.6.3
 docker
-rabbitmq porta padrão (usando docker)
+activemq porta padrão (usando docker)
 cassandra porta padrão (usando docker)
 ```
 
