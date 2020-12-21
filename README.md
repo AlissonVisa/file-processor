@@ -22,10 +22,10 @@ Na raiz de cada projeto execute:
 mvn spring-boot:run
 ```
 
-Para definir variável de ambiente execute:
+Para definir variável de ambiente execute (não coloque barra no final do caminho, as pastas /data/in não devem aparecer neste endereço):
 
 ```
-mvn spring-boot:run -DHOME_PATH=/YOUR/HOME/PATH/DIR/
+mvn spring-boot:run -DHOME_PATH=/YOUR/HOME/PATH/DIR
 ```
 
 ## Melhorias
