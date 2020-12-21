@@ -30,6 +30,7 @@ mvn spring-boot:run -DHOME_PATH=/YOUR/HOME/PATH/DIR/
 
 ## Melhorias
 
+* Expor batch chunk size como parâmetro externo
 * Implementar as regras de negócio de clientes e vendas
 * Cada contexto de negócio na sua aplicação
 * Aplicações em containers
