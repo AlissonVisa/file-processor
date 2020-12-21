@@ -27,9 +27,9 @@ Para definir variável de ambiente execute:
 mvn spring-boot:run -DHOME_PATH=/YOUR/HOME/PATH/DIR/
 ```
 
-Melhorias
+##Melhorias
 
-implementar as regras de negócio de clientes e vendas
-cada contexto na sua aplicação
-dockerizar
-escalar via kubernetes
+* Implementar as regras de negócio de clientes e vendas
+* Cada contexto de negócio na sua aplicação
+* Dockerizar
+* Escalar via kubernetes
