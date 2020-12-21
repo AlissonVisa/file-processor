@@ -34,3 +34,4 @@ mvn spring-boot:run -DHOME_PATH=/YOUR/HOME/PATH/DIR/
 * Cada contexto de negócio na sua aplicação
 * Dockerizar
 * Escalar via kubernetes
+* Testes
