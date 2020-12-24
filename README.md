@@ -13,7 +13,7 @@ cassandra porta padrão (usando docker)
 ## Rodar os serviços
 
 * batch-file-chunk-worker (quantas instancias quiser, quanto mais melhor será a performance)
-* batch-file-reader (somente 1 instancia, definir a variável de ambiente "HOME_PATH" na linha de comando, dentro desse caminho deve haver uma pasta /data/in com os arquivos de input)
+* batch-file-reader (somente 1 instancia, definir a variável de ambiente "HOME_PATH" na linha de comando, dentro desse caminho deve haver uma pasta /data/in com os arquivos de input do tipo .dat)
 * salesman-api (quantas instancias quiser para escalar)
 
 Na raiz de cada projeto execute:
@@ -22,16 +22,18 @@ Na raiz de cada projeto execute:
 mvn spring-boot:run
 ```
 
-Para definir variável de ambiente execute:
+Para definir variável de ambiente execute (não coloque barra no final do caminho, as pastas /data/in não devem aparecer neste endereço):
 
 ```
-mvn spring-boot:run -DHOME_PATH=/YOUR/HOME/PATH/DIR/
+mvn spring-boot:run -DHOME_PATH=/YOUR/HOME/PATH/DIR
 ```
 
 ## Melhorias
 
+* Expor batch chunk size como parâmetro externo
 * Implementar as regras de negócio de clientes e vendas
 * Cada contexto de negócio na sua aplicação
-* Dockerizar
-* Escalar via kubernetes
+* Aplicações em containers
+* Expor métricas com Actuator
+* Escalar via kubernetes observando métricas das filas
 * Testes
