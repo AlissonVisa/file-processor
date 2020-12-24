@@ -29,3 +29,9 @@ mvn spring-boot:run -Dhomepath.dir=/YOUR/HOME/PATH/DIR/
 ```
 
 Alternativamente pode ser usada a variável de ambiente HOMEPATH (linux) ao invés do parâmetro maven.
+
+Para definir quantas linhas serão lidas por fatia (processamento em paralelo), utilize o comando com os seguintes parâmetros: (chunk.size padrão = 20)
+
+```
+mvn spring-boot:run -Dhomepath.dir=/YOUR/HOME/PATH/DIR/ -Dchunk.size=50
+```
