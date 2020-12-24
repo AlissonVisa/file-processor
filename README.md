@@ -22,18 +22,10 @@ Na raiz de cada projeto execute:
 mvn spring-boot:run
 ```
 
-Para definir variável de ambiente execute:
+Para definir variável maven execute (não incluir /data/in neste endereço):
 
 ```
 mvn spring-boot:run -Dhomepath.dir=/YOUR/HOME/PATH/DIR/
 ```
 
 Alternativamente pode ser usada a variável de ambiente HOMEPATH (linux) ao invés do parâmetro maven.
-
-## Melhorias
-
-* Implementar as regras de negócio de clientes e vendas
-* Cada contexto de negócio na sua aplicação
-* Dockerizar
-* Escalar via kubernetes
-* Testes
