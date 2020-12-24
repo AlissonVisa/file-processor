@@ -1,7 +1,7 @@
 package com.alissonvisa.salesmanapi.application.jms;
 
 import com.alissonvisa.salesmanapi.domain.Sale;
-import com.alissonvisa.salesmanapi.domain.service.DomainSalesmanService;
+import com.alissonvisa.salesmanapi.domain.service.SaleService;
 import com.alissonvisa.salesmanapi.domain.service.SalesmanService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +18,12 @@ public class Receiver {
 
     private final SalesmanService salesmanService;
 
+    private final SaleService saleService;
+
     @Autowired
-    public Receiver(SalesmanService salesmanService) {
+    public Receiver(SalesmanService salesmanService, SaleService saleService) {
         this.salesmanService = salesmanService;
+        this.saleService = saleService;
     }
 
     @JmsListener(destination = SALESMAN_QUEUE)
@@ -33,6 +36,7 @@ public class Receiver {
     public void onReceiveSale(String message) {
         log.info("sale received message='{}'", message);
         final Sale sale = new SaleMessageMapper().map(getCleanLine(message));
+        this.saleService.save(sale);
         // TODO save sale
     }
 

@@ -1,7 +1,7 @@
 package com.alissonvisa.salesmanapi.infrastructure.repository.cassandra;
 
 import com.alissonvisa.salesmanapi.domain.Salesman;
-import com.alissonvisa.salesmanapi.infrastructure.repository.Entity;
+import com.alissonvisa.salesmanapi.infrastructure.repository.EntityDomain;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,12 +18,12 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 @Table("salesman")
-class SalesmanEntity implements Entity<Salesman> {
+class SalesmanEntity implements EntityDomain<Salesman> {
 
-    @PrimaryKeyColumn(name = "name", ordinal = 1, type = PrimaryKeyType.CLUSTERED)
-    private String name;
     @PrimaryKeyColumn(name = "import_archive", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
     private String importArchive;
+    @PrimaryKeyColumn(name = "name", ordinal = 1, type = PrimaryKeyType.CLUSTERED)
+    private String name;
     private String cpf;
     private BigDecimal salary;
     @Column("total_sold")

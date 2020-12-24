@@ -36,6 +36,12 @@ public class Salesman {
         this.totalSold = totalSold;
     }
 
+    public Salesman(String importArchive, String name, BigDecimal totalSold) {
+        this.importArchive = importArchive;
+        this.name = name;
+        this.totalSold = totalSold;
+    }
+
     public boolean addSale(Sale sale) {
         if (!sale.getSalesmanName().equals(this.name) || !sale.getArchiveName().equals(importArchive)) {
             log.warn(String.format("Sale %s is not part of archive %s or not sold by the salesman %s",

@@ -1,5 +1,5 @@
 package com.alissonvisa.salesmanapi.infrastructure.repository;
 
-public interface Entity<T> {
+public interface EntityDomain<T> {
     T toDomain();
 }

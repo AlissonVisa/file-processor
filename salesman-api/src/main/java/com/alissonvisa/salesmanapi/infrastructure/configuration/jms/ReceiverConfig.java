@@ -1,6 +1,5 @@
 package com.alissonvisa.salesmanapi.infrastructure.configuration.jms;
 
-import com.alissonvisa.salesmanapi.application.jms.Receiver;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

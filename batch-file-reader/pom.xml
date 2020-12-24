@@ -19,6 +19,8 @@
 		<activemq.version>5.15.14</activemq.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<homepath.dir>${env.HOMEPATH}</homepath.dir>
+		<chunk.size>20</chunk.size>
 	</properties>
 
 	<dependencies>

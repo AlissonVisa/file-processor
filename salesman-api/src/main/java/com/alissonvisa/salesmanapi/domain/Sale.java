@@ -12,6 +12,18 @@ public class Sale {
     private BigDecimal totalSaleValue;
     private String archiveName;
 
+    public Sale(Long id, String salesmanName, BigDecimal totalSaleValue, String archiveName) {
+        this.id = id;
+        this.salesmanName = salesmanName;
+        this.totalSaleValue = totalSaleValue;
+        this.archiveName = archiveName;
+    }
+
+    public Sale(Long id, String salesmanName, BigDecimal totalSaleValue) {
+        this.id = id;
+        this.salesmanName = salesmanName;
+        this.totalSaleValue = totalSaleValue;
+    }
     public Sale(Long id, String salesmanName, String archiveName) {
         this.id = id;
         this.archiveName = archiveName;

@@ -36,15 +36,18 @@ import org.springframework.integration.file.dsl.Files;
 import org.springframework.integration.file.filters.SimplePatternFileListFilter;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.jms.dsl.Jms;
-import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.core.JmsTemplate;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.UUID;
 
 @Configuration
@@ -55,12 +58,20 @@ import java.util.UUID;
 public class JobManagerConfiguration {
 
     private static final String WILL_BE_INJECTED = null;
+    public static final String FINISH_FILE_QUEUE = "finish_file_queue";
+    public static final String DATA_IN = "/data/in";
 
     @Value("${broker.url}")
     private String brokerUrl;
 
     @Value("${jms.responseQueue}")
     private String responseQueue;
+
+    @Value("${homepath.dir}")
+    private String homepath;
+
+    @Value("${chunk.size}")
+    private String chunkSize;
 
     private final Environment env;
 
@@ -144,7 +155,7 @@ public class JobManagerConfiguration {
     @Bean
     public TaskletStep managerStep() {
         return this.managerStepBuilderFactory.get("managerStep")
-                .chunk(5)
+                .chunk(Integer.valueOf(this.chunkSize))
                 .reader(sampleReader(WILL_BE_INJECTED))
                 .outputChannel(requests())
                 .inputChannel(replies())
@@ -171,7 +182,7 @@ public class JobManagerConfiguration {
     @JobScope
     public Step writeOutputStep(@Value("#{jobParameters[input_file_name]}") String resource) {
         String filename = getDoneFileName(resource);
-        Path donePath = Paths.get(env.getProperty("HOME_PATH") + "/data/out/");
+        Path donePath = Paths.get(this.homepath + "/data/out/");
         Path doneFile = Paths.get(donePath + "/" + filename);
         Tasklet step = (stepContribution, chunkContext) -> {
             try {
@@ -179,7 +190,10 @@ public class JobManagerConfiguration {
             } catch(Exception e) {
                 log.error(e.getMessage() + " Path: " + donePath.toString(), e);
             }
+            log.info("init done file");
+            final long nowms = new Date().getTime();
             final TextMessage response = sendAndReceive(resource);
+            log.info("end done file = time = " + (new Date().getTime() - nowms));
             try {
                 createDoneFile(doneFile, response);
             } catch(Exception e) {
@@ -192,7 +206,7 @@ public class JobManagerConfiguration {
     }
 
     private TextMessage sendAndReceive(String resource) {
-        return messageProducerAndReceive().sendAndReceiveMessage("finish_file_queue", Paths.get(resource).getFileName().toString());
+        return messageProducerAndReceive().sendAndReceiveMessage(FINISH_FILE_QUEUE, Paths.get(resource).getFileName().toString());
     }
 
     private void createDoneFile(Path doneFile, TextMessage response) throws IOException, JMSException {
@@ -236,8 +250,9 @@ public class JobManagerConfiguration {
 
     @Bean
     public IntegrationFlow integrationFlow(JobLaunchingGateway jobLaunchingGateway) {
+        log.info("HOMEPATH=" + this.homepath);
         return IntegrationFlows.from(
-                    Files.inboundAdapter(Paths.get(env.getProperty("HOME_PATH") + "/data/in").toFile())
+                    Files.inboundAdapter(Paths.get(this.homepath + DATA_IN).toFile())
                             .filter(new SimplePatternFileListFilter("*.dat"))
                             .useWatchService(true)
                             .preventDuplicates(true)

@@ -18,7 +18,7 @@ public class SalesmanRanking {
         return positions.stream()
                 .min(Comparator.comparing(SalesmanRankingPosition::getTotalValueSold))
                 .map(it->it.getSalesmanName())
-                .orElse(null);
+                .orElse("");
     }
 
 }

@@ -2,8 +2,6 @@ package com.alissonvisa.salesmanapi.application.jms;
 
 import com.alissonvisa.salesmanapi.domain.Salesman;
 
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
 import java.math.BigDecimal;
 
 public class SalesmanMessageMapper implements MessageDomainMapper<Salesman> {
