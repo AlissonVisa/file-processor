@@ -22,11 +22,4 @@ public class SalesmanMessageMapper implements MessageDomainMapper<Salesman> {
         return salesman;
     }
 
-    private String restoreOriginalElement(int importArchive, String[] elements) {
-        return elements[importArchive].replace("\u00E7\u00E7".toUpperCase(), "\u00E7");
-    }
-
-    private String[] getMessageElements(String message) {
-        return message.split(delimiter());
-    }
 }

@@ -38,16 +38,13 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.jms.dsl.Jms;
 import org.springframework.jms.core.JmsTemplate;
 
-import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.UUID;
 
 @Configuration
@@ -58,7 +55,6 @@ import java.util.UUID;
 public class JobManagerConfiguration {
 
     private static final String WILL_BE_INJECTED = null;
-    public static final String FINISH_FILE_QUEUE = "finish_file_queue";
     public static final String DATA_IN = "/data/in";
 
     @Value("${broker.url}")
@@ -67,10 +63,19 @@ public class JobManagerConfiguration {
     @Value("${jms.responseQueue}")
     private String responseQueue;
 
-    @Value("${homepath.dir}")
+    @Value("${jms.finishFileSalesmanQueue}")
+    private String finishFileSalesmanQueue;
+
+    @Value("${jms.finishFileSalesQueue}")
+    private String finishFileSalesQueue;
+
+    @Value("${jms.finishFileCustomerQueue}")
+    private String finishFileCustomerQueue;
+
+    @Value("${homepath.dir:/app/file-input}")
     private String homepath;
 
-    @Value("${chunk.size}")
+    @Value("${chunk.size:50}")
     private String chunkSize;
 
     private final Environment env;
@@ -184,37 +189,47 @@ public class JobManagerConfiguration {
         String filename = getDoneFileName(resource);
         Path donePath = Paths.get(this.homepath + "/data/out/");
         Path doneFile = Paths.get(donePath + "/" + filename);
-        Tasklet step = (stepContribution, chunkContext) -> {
-            try {
-                java.nio.file.Files.createDirectories(donePath);
-            } catch(Exception e) {
-                log.error(e.getMessage() + " Path: " + donePath.toString(), e);
-            }
-            log.info("init done file");
-            final long nowms = new Date().getTime();
-            final TextMessage response = sendAndReceive(resource);
-            log.info("end done file = time = " + (new Date().getTime() - nowms));
-            try {
-                createDoneFile(doneFile, response);
-            } catch(Exception e) {
-                log.error(e.getMessage() + " Path: " + doneFile.toString(), e);
-            }
-            log.info("Done file successful. Path: " + doneFile.toString());
-            return RepeatStatus.FINISHED;
-        };
+        Tasklet step = (stepContribution, chunkContext) -> writeOutDoneFile(resource, donePath, doneFile);
         return this.stepBuilderFactory.get("writeOutputStep").tasklet(step).build();
     }
 
-    private TextMessage sendAndReceive(String resource) {
-        return messageProducerAndReceive().sendAndReceiveMessage(FINISH_FILE_QUEUE, Paths.get(resource).getFileName().toString());
+    private RepeatStatus writeOutDoneFile(String resource, Path donePath, Path doneFile) {
+        createDirectories(donePath);
+        final TextMessage responseSalesman = sendAndReceive(resource, finishFileSalesmanQueue);
+        final TextMessage responseCustomer = sendAndReceive(resource, finishFileCustomerQueue);
+        final TextMessage responseSales = sendAndReceive(resource, finishFileSalesQueue);
+        createDoneFile(doneFile, responseSalesman, responseCustomer, responseSales);
+        return RepeatStatus.FINISHED;
     }
 
-    private void createDoneFile(Path doneFile, TextMessage response) throws IOException, JMSException {
-        java.nio.file.Files.createFile(doneFile);
-        Writer output;
-        output = new BufferedWriter(new FileWriter(doneFile.toString()));
-        output.append(response.getText() + "\n");
-        output.close();
+    private void createDirectories(Path donePath) {
+        try {
+            java.nio.file.Files.createDirectories(donePath);
+        } catch(Exception e) {
+            log.error(e.getMessage() + " Path: " + donePath.toString(), e);
+        }
+    }
+
+    private TextMessage sendAndReceive(String resource, String queue) {
+        return messageProducerAndReceive().sendAndReceiveMessage(queue, Paths.get(resource).getFileName().toString());
+    }
+
+    private void createDoneFile(Path doneFile,
+                                TextMessage responseSalesman,
+                                TextMessage responseCustomer,
+                                TextMessage responseSales) {
+        try {
+            java.nio.file.Files.createFile(doneFile);
+            Writer output;
+            output = new BufferedWriter(new FileWriter(doneFile.toString()));
+            output.append(responseCustomer.getText() + "\n");
+            output.append(responseSalesman.getText() + "\n");
+            output.append(responseSales.getText());
+            output.close();
+            log.info("Done file successful. Path: " + doneFile.toString());
+        } catch(Exception e) {
+            log.error(e.getMessage() + " Path: " + doneFile.toString(), e);
+        }
     }
 
     private String getDoneFileName(String resource) {
@@ -250,9 +265,11 @@ public class JobManagerConfiguration {
 
     @Bean
     public IntegrationFlow integrationFlow(JobLaunchingGateway jobLaunchingGateway) {
+        log.info("CHUNK_SIZE=" + this.chunkSize);
         log.info("HOMEPATH=" + this.homepath);
         return IntegrationFlows.from(
                     Files.inboundAdapter(Paths.get(this.homepath + DATA_IN).toFile())
+                            .autoCreateDirectory(true)
                             .filter(new SimplePatternFileListFilter("*.dat"))
                             .useWatchService(true)
                             .preventDuplicates(true)

@@ -1,5 +1,7 @@
 package com.alissonvisa.batchfilechunkworker.messaging;
 
+import javax.jms.TextMessage;
+
 public interface MessageProducer {
-    void sendMessage(String queueName, String message);
+    TextMessage sendAndReceiveMessage(String queueName, String message);
 }

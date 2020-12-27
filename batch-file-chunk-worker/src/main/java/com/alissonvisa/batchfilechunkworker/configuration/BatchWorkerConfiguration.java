@@ -5,6 +5,7 @@ import com.alissonvisa.batchfilechunkworker.messaging.MessageProducer;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.integration.chunk.RemoteChunkingWorkerBuilder;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
@@ -21,8 +22,10 @@ import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.jms.dsl.Jms;
 import org.springframework.jms.core.JmsTemplate;
 
+import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Configuration
 @EnableBatchProcessing
@@ -42,6 +45,9 @@ public class BatchWorkerConfiguration {
 
     @Value("${jms.customer.queue}")
     private String customerQueue;
+
+    @Value("${jms.chunk.responseQueue}")
+    private String chunkResponseQueue;
 
     @Autowired
     private RemoteChunkingWorkerBuilder<String, String> remoteChunkingWorkerBuilder;
@@ -106,8 +112,11 @@ public class BatchWorkerConfiguration {
             for (String item : items) {
                 System.out.println("writing item " + item + " timestamp: " + LocalDateTime.now().toString());
                 try {
-                    messageProducer().sendMessage(getBusinessQueueName(item), item);
-                } catch (IllegalArgumentException e) {
+                    final TextMessage textMessage = messageProducer().sendAndReceiveMessage(getBusinessQueueName(item), item);
+                    if(!Boolean.valueOf(textMessage.getText())) {
+                        log.warn("Item not processed: '{}'", item);
+                    }
+                } catch (IllegalArgumentException | JMSException e) {
                     log.warn(e.getMessage() + " Ignoring item processing " + item);
                 }
             }
@@ -148,9 +157,11 @@ public class BatchWorkerConfiguration {
                 throw new IllegalArgumentException("Queue must not be empty");
             }
             log.debug("Sending message " + message + "to queue - " + queueName);
-            jmsTemplate.send(queueName, session -> {
+            return (TextMessage) jmsTemplate.sendAndReceive(queueName, session -> {
                 TextMessage messageToSend = session.createTextMessage();
                 messageToSend.setText(message);
+                messageToSend.setJMSCorrelationID(UUID.randomUUID().toString());
+                messageToSend.setJMSReplyTo(new ActiveMQQueue(chunkResponseQueue));
                 return messageToSend;
             });
         };

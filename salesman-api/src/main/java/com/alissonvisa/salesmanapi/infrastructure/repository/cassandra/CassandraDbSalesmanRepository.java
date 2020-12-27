@@ -24,13 +24,13 @@ public class CassandraDbSalesmanRepository implements SalesmanRepository {
     @Override
     public Long getSalesmanCountByArchive(String archiveName) {
         long count = cqlTemplate.queryForObject(
-                "SELECT COUNT(*) FROM salesman_database.salesman WHERE import_archive = ? ALLOW FILTERING", Long.class, archiveName);
+                "SELECT COUNT(*) FROM salesman WHERE import_archive = ?", Long.class, archiveName);
         return count;
     }
 
     @Override
     public void save(Salesman salesman) {
-        cqlTemplate.execute("INSERT INTO salesman_database.salesman (name, cpf, import_archive, salary, total_sold) VALUES (?, ?, ?, ?, ?)", salesman.getName(), salesman.getCpf(), salesman.getImportArchive(), salesman.getSalary(), salesman.getTotalSold());
+        cqlTemplate.execute("INSERT INTO salesman (name, cpf, import_archive, salary) VALUES (?, ?, ?, ?)", salesman.getName(), salesman.getCpf(), salesman.getImportArchive(), salesman.getSalary());
     }
 
     @Override

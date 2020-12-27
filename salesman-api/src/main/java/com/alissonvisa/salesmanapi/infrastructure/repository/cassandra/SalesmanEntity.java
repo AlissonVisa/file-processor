@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
-import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.core.mapping.Table;
 
@@ -26,19 +25,16 @@ class SalesmanEntity implements EntityDomain<Salesman> {
     private String name;
     private String cpf;
     private BigDecimal salary;
-    @Column("total_sold")
-    private BigDecimal totalSold;
 
     public SalesmanEntity(Salesman salesman) {
         this.importArchive = salesman.getImportArchive();
         this.name = salesman.getName();
         this.cpf = salesman.getCpf();
         this.salary = salesman.getSalary();
-        this.totalSold = salesman.getTotalSold();
     }
 
     @Override
     public Salesman toDomain() {
-        return new Salesman(this.importArchive, this.name, this.cpf, this.salary, this.totalSold);
+        return new Salesman(this.importArchive, this.name, this.cpf, this.salary);
     }
 }
