@@ -91,6 +91,8 @@ docker rm file-reader
 docker run --name file-reader --network=host -e CHUNK_SIZE=120 -v $HOME/data:/app/file-input/data alissonvisa/batch-file-reader:0.0.1-SNAPSHOT
 ```
 
+## Escalabilidade
+
 #### Todas as aplicações aceitam réplicas, exceto a `file-reader` que deve rodar somente em 1 instância.
 Recomanda-se que utilize pelo menos 3 réplicas ou mais, da aplicação `batch-file-chunk-worker`. Porém, funciona normalmente com apenas 1 instância.
 
