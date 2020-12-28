@@ -74,6 +74,7 @@ O resultado do arquivo processado deverá aparecer em `$HOME/data/out` com final
 ### Troubleshooting
 
 Caso os diretórios da aplicação `file-reader`, não sincronizem com seu sistema local de arquivos, deve-se adicionar o arquivo diretamente no container docker.
+Não é recomendado o uso de Docker no Windows para esse cenário.
 Para adicionar os arquivos no container docker da aplicação `file-reader`, para serem processados, execute:
 
 ```
