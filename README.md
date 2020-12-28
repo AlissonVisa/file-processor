@@ -71,7 +71,7 @@ docker run --name file-reader --network=host -e CHUNK_SIZE=120 -v $HOME/data:/ap
 Para processar arquivos inclua-os na pasta `$HOME/data/in`, com a extensão `.dat`.
 O resultado do arquivo processado deverá aparecer em `$HOME/data/out` com final `.done.dat`
 
-###Troubleshooting
+### Troubleshooting
 
 Caso os diretórios da aplicação `file-reader`, não sincronizem com seu sistema local de arquivos, deve-se adicionar o arquivo diretamente no container docker.
 Para adicionar os arquivos no container docker da aplicação `file-reader`, para serem processados, execute:
