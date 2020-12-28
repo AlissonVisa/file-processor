@@ -1,6 +1,6 @@
-# k8s-file-processor
+# Processador de arquivos em batch
 
-Instalar na máquina:
+## Instalar na máquina:
 
 ```
 jdk-11 (usado openjdk zulu)
@@ -10,36 +10,86 @@ activemq porta padrão (usando docker)
 cassandra porta padrão (usando docker)
 ```
 
-Comandos docker para o CassandraDB e ActiveMQ:
+Comandos docker para o `Cassandra` e `ActiveMQ` (Execute no terminal, assumindo que seu usuário esteja no grupo docker):
 
 ```
 docker run -p 9042:9042 --rm --name cassandra -d cassandra
 docker run -p 61616:61616 -p 8161:8161 rmohr/activemq
 ```
 
-## Rodar os serviços
+Após ter o banco `Cassandra` e o `ActiveMQ` rodando em sua máquina local, siga para o próximo passo.
 
-* batch-file-chunk-worker (quantas instancias quiser, quanto mais melhor será a performance)
-* batch-file-reader (somente 1 instancia, definir a variável maven "homepath.dir" na linha de comando, dentro desse caminho deve haver uma pasta /data/in com os arquivos de input)
-* salesman-api (quantas instancias quiser para escalar)
+## Criar imagem docker
 
-Na raiz de cada projeto execute:
+Na raiz do projeto `k8s-file-processor`, dentro de cada uma das seguintes pastas:
 
 ```
-mvn spring-boot:run
+batch-file-chunk-worker, batch-file-reader, customer-api, sales-api e salesman-api
 ```
-
-Para definir variável maven execute (não incluir /data/in neste endereço):
-
-```
-mvn spring-boot:run -Dhomepath.dir=/YOUR/HOME/PATH/DIR/
-```
-
-Alternativamente pode ser usada a variável de ambiente HOMEPATH (linux) ao invés do parâmetro maven.
-
-Para definir quantas linhas serão lidas por fatia (processamento em paralelo), utilize o comando com os seguintes parâmetros: (chunk.size padrão = 20)
+Execute no terminal:
 
 ```
-mvn spring-boot:run -Dhomepath.dir=/YOUR/HOME/PATH/DIR/ -Dchunk.size=50
+mvn package
 ```
+## Aplicações
+
+### Batch File Reader `batch-file-reader`
+
+Aplicação responsável por ler os arquivos na pasta pré-configurada, dividir os lotes de arquivo de acordo com a configuração, para cada lote é delegado a execução à aplicação chunk-worker.
+
+### Batch File Chunk Worker `batch-file-chunk-worker`
+
+Aplicação responsável por ler os lotes de arquivos enviados pela aplicação File Reader, responsável por classificar a linha e produzir mensagens para as filas em que as aplicações API estão consumindo.
+
+
+### Salesman API `salesman-api`
+
+Aplicação responsável por receber as linhas referêntes aos vendedores, contidas nos arquivos de importação.
+
+### Sales API `sales-api`
+
+Aplicação responsável por receber as linhas referêntes às vendas, contidas nos arquivos de importação.
+
+### Customer API `sales-api`
+
+Aplicação responsável por receber as linhas referêntes aos clientes, contidas nos arquivos de importação.
+
+## Deploy das aplicações
+
+Execute:
+
+```
+docker run --network=host alissonvisa/salesman-api:0.0.1-SNAPSHOT
+docker run --network=host alissonvisa/sales-api:0.0.1-SNAPSHOT
+docker run --network=host alissonvisa/customer-api:0.0.1-SNAPSHOT
+docker run --network=host alissonvisa/batch-file-chunk-worker:0.0.1-SNAPSHOT
+docker run --name file-reader --network=host -e CHUNK_SIZE=120 -v $HOME/data:/app/file-input/data alissonvisa/batch-file-reader:0.0.1-SNAPSHOT
+```
+
+### Processando Arquivos
+
+Para processar arquivos inclua-os na pasta `$HOME/data/in`, com a extensão `.dat`.
+O resultado do arquivo processado deverá aparecer em `$HOME/data/out` com final `.done.dat`
+
+###Troubleshooting
+
+Caso os diretórios da aplicação `file-reader`, não sincronizem com seu sistema local de arquivos, deve-se adicionar o arquivo diretamente no container docker.
+Para adicionar os arquivos no container docker da aplicação `file-reader`, para serem processados, execute:
+
+```
+docker cp $HOME/data/in/meu_arquivo.dat file-reader:/app/file-input/data/in
+```
+
+Assumindo que o nome do container da aplicação `batch-file-reader`, seja `file-reader`
+
+Recomenda-se parar o container e criá-lo novamente com o comando (na tentativa de sincronizar as pastas do volume `-v`):
+
+```
+docker stop file-reader
+docker rm file-reader
+docker run --name file-reader --network=host -e CHUNK_SIZE=120 -v $HOME/data:/app/file-input/data alissonvisa/batch-file-reader:0.0.1-SNAPSHOT
+```
+
+#### Todas as aplicações aceitam réplicas, exceto a `file-reader` que deve rodar somente em 1 instância.
+Recomanda-se que utilize pelo menos 3 réplicas ou mais, da aplicação `batch-file-chunk-worker`. Porém, funciona normalmente com 1 réplica.
 

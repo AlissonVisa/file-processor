@@ -19,7 +19,7 @@ public class DomainSaleService implements SaleService {
 
     @Override
     public String getWorstSalesman(String archiveName) {
-        final List<Sale> sales = saleRepository.getSales(archiveName);
+        final List<Sale> sales = saleRepository.getSales(archiveName.toUpperCase());
         final Map<String, List<Sale>> salesmanSales = getSalesmanSales(sales);
         final List<SalesmanRankingPosition> positions = getPositions(salesmanSales);
         return new SalesmanRanking(positions).getWorstSalesman();
@@ -27,7 +27,7 @@ public class DomainSaleService implements SaleService {
 
     @Override
     public Sale getBestSale(String archiveName) {
-        return this.saleRepository.getBestSale(archiveName);
+        return this.saleRepository.getBestSale(archiveName.toUpperCase());
     }
 
     private Map<String, List<Sale>> getSalesmanSales(List<Sale> sales) {

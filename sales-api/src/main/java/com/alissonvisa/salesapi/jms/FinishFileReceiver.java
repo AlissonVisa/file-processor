@@ -39,7 +39,7 @@ public class FinishFileReceiver implements SessionAwareMessageListener<TextMessa
         responseMessage.setJMSCorrelationID(message.getJMSCorrelationID());
         responseMessage.setText(String.format(
                 "ID da venda mais cara=%s\n" +
-                "O pior vendedor=%s", bestSale.getId(), worstSalesman));
+                "O pior vendedor=%s\n", bestSale.getId(), worstSalesman));
 
         final MessageProducer producer = session.createProducer(message.getJMSReplyTo());
         producer.send(responseMessage);
