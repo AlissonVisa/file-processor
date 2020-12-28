@@ -7,6 +7,7 @@ import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.jms.util.JmsAdapterUtils;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 
@@ -59,11 +60,11 @@ public class ReceiverConfig {
     }
 
     @Bean
-    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() throws JMSException {
-        DefaultJmsListenerContainerFactory factory =
-                new DefaultJmsListenerContainerFactory();
-        factory
-                .setConnectionFactory(receiverActiveMQConnectionFactory());
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        factory.setSessionAcknowledgeMode(JmsAdapterUtils.CLIENT_ACKNOWLEDGE);
+        factory.setSessionTransacted(false);
+        factory.setConnectionFactory(receiverActiveMQConnectionFactory());
 
         return factory;
     }

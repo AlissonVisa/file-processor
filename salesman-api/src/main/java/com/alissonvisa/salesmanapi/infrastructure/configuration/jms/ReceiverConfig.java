@@ -11,7 +11,6 @@ import org.springframework.integration.jms.util.JmsAdapterUtils;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 
-import javax.jms.JMSException;
 import java.util.List;
 
 @Configuration
@@ -59,7 +58,7 @@ public class ReceiverConfig {
     }
 
     @Bean
-    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() throws JMSException {
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setSessionAcknowledgeMode(JmsAdapterUtils.CLIENT_ACKNOWLEDGE);
         factory.setSessionTransacted(false);
