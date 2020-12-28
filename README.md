@@ -1,6 +1,6 @@
 # Processador de arquivos em batch
 
-## Instalar na máquina:
+## Instalar na máquina (testado em Ubuntu 20.10):
 
 ```
 jdk-11 (usado openjdk zulu)
