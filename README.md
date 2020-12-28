@@ -10,6 +10,13 @@ activemq porta padrão (usando docker)
 cassandra porta padrão (usando docker)
 ```
 
+Comandos docker para o CassandraDB e ActiveMQ:
+
+```
+docker run -p 9042:9042 --rm --name cassandra -d cassandra
+docker run -p 61616:61616 -p 8161:8161 rmohr/activemq
+```
+
 ## Rodar os serviços
 
 * batch-file-chunk-worker (quantas instancias quiser, quanto mais melhor será a performance)
@@ -35,3 +42,4 @@ Para definir quantas linhas serão lidas por fatia (processamento em paralelo), 
 ```
 mvn spring-boot:run -Dhomepath.dir=/YOUR/HOME/PATH/DIR/ -Dchunk.size=50
 ```
+
