@@ -5,6 +5,8 @@ import com.alissonvisa.batchfilechunkworker.messaging.MessageProducer;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.RedeliveryPolicy;
+import org.apache.activemq.broker.region.policy.RedeliveryPolicyMap;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.integration.chunk.RemoteChunkingWorkerBuilder;
@@ -22,10 +24,15 @@ import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.jms.dsl.Jms;
 import org.springframework.jms.core.JmsTemplate;
 
+import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Configuration
 @EnableBatchProcessing
@@ -52,8 +59,14 @@ public class BatchWorkerConfiguration {
     @Autowired
     private RemoteChunkingWorkerBuilder<String, String> remoteChunkingWorkerBuilder;
 
-    @Autowired
-    private JmsTemplate jmsTemplate;
+    @Bean
+    public JmsTemplate jmsTemplate() {
+        JmsTemplate template = new JmsTemplate();
+        template.setConnectionFactory(connectionFactory());
+        template.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+        template.setDeliveryMode(DeliveryMode.PERSISTENT);
+        return template;
+    }
 
     @Bean
     public ActiveMQConnectionFactory connectionFactory() {
@@ -110,14 +123,14 @@ public class BatchWorkerConfiguration {
     public ItemWriter<String> itemWriter() {
         return items -> {
             for (String item : items) {
-                System.out.println("writing item " + item + " timestamp: " + LocalDateTime.now().toString());
+                log.info("writing item " + item + " timestamp: " + LocalDateTime.now().toString());
                 try {
                     final TextMessage textMessage = messageProducer().sendAndReceiveMessage(getBusinessQueueName(item), item);
                     if(!Boolean.valueOf(textMessage.getText())) {
                         log.warn("Item not processed: '{}'", item);
                     }
                 } catch (IllegalArgumentException | JMSException e) {
-                    log.warn(e.getMessage() + " Ignoring item processing " + item);
+                    log.warn(e.getMessage() + ". Ignoring item processing " + item);
                 }
             }
         };
@@ -157,7 +170,7 @@ public class BatchWorkerConfiguration {
                 throw new IllegalArgumentException("Queue must not be empty");
             }
             log.debug("Sending message " + message + "to queue - " + queueName);
-            return (TextMessage) jmsTemplate.sendAndReceive(queueName, session -> {
+            return (TextMessage) jmsTemplate().sendAndReceive(queueName, session -> {
                 TextMessage messageToSend = session.createTextMessage();
                 messageToSend.setText(message);
                 messageToSend.setJMSCorrelationID(UUID.randomUUID().toString());
