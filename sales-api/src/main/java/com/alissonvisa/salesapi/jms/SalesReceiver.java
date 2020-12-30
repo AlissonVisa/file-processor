@@ -43,6 +43,7 @@ public class SalesReceiver implements SessionAwareMessageListener<TextMessage> {
             final Sale sale = new SaleMessageMapper().map(message.getText());
             this.saleService.save(sale);
             reply(Boolean.TRUE, responseMessage, producer);
+            message.acknowledge();
         } catch (Exception e) {
             log.error("sales failing, exception='{}', message='{}' on '{}'", e.getMessage(), message.getText(), Thread.currentThread().getName());
             if(redeliveryCount > maximumRedelivery) {

@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.integration.channel.DirectChannel;
@@ -32,7 +31,6 @@ import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.Pollers;
-import org.springframework.integration.file.dsl.Files;
 import org.springframework.integration.file.filters.SimplePatternFileListFilter;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.jms.dsl.Jms;
@@ -41,8 +39,10 @@ import org.springframework.jms.core.JmsTemplate;
 import javax.jms.TextMessage;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -56,6 +56,7 @@ public class JobManagerConfiguration {
 
     private static final String WILL_BE_INJECTED = null;
     public static final String DATA_IN = "/data/in";
+    public static final String DATA_OUT = "/data/out";
 
     @Value("${broker.url}")
     private String brokerUrl;
@@ -78,8 +79,6 @@ public class JobManagerConfiguration {
     @Value("${chunk.size:50}")
     private String chunkSize;
 
-    private final Environment env;
-
     private final JobBuilderFactory jobBuilderFactory;
 
     private final RemoteChunkingManagerStepBuilderFactory managerStepBuilderFactory;
@@ -92,12 +91,10 @@ public class JobManagerConfiguration {
     private JmsTemplate jmsTemplate;
 
     @Autowired
-    public JobManagerConfiguration(Environment env,
-                                   JobBuilderFactory jobBuilderFactory,
+    public JobManagerConfiguration(JobBuilderFactory jobBuilderFactory,
                                    RemoteChunkingManagerStepBuilderFactory managerStepBuilderFactory,
                                    StepBuilderFactory stepBuilderFactory,
                                    JobRepository jobRepository) {
-        this.env = env;
         this.jobBuilderFactory = jobBuilderFactory;
         this.managerStepBuilderFactory = managerStepBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
@@ -187,7 +184,7 @@ public class JobManagerConfiguration {
     @JobScope
     public Step writeOutputStep(@Value("#{jobParameters[input_file_name]}") String resource) {
         String filename = getDoneFileName(resource);
-        Path donePath = Paths.get(this.homepath + "/data/out/");
+        Path donePath = Paths.get(this.homepath + DATA_OUT);
         Path doneFile = Paths.get(donePath + "/" + filename);
         Tasklet step = (stepContribution, chunkContext) -> writeOutDoneFile(resource, donePath, doneFile);
         return this.stepBuilderFactory.get("writeOutputStep").tasklet(step).build();
@@ -264,11 +261,13 @@ public class JobManagerConfiguration {
     }
 
     @Bean
-    public IntegrationFlow integrationFlow(JobLaunchingGateway jobLaunchingGateway) {
+    public IntegrationFlow integrationFlow(JobLaunchingGateway jobLaunchingGateway) throws IOException {
         log.info("CHUNK_SIZE=" + this.chunkSize);
         log.info("HOMEPATH=" + this.homepath);
+        Path pathFile = createFileDirectories(DATA_IN);
+        createFileDirectories(DATA_OUT);
         return IntegrationFlows.from(
-                    Files.inboundAdapter(Paths.get(this.homepath + DATA_IN).toFile())
+                    org.springframework.integration.file.dsl.Files.inboundAdapter(pathFile.toFile())
                             .autoCreateDirectory(true)
                             .filter(new SimplePatternFileListFilter("*.dat"))
                             .useWatchService(true)
@@ -279,6 +278,14 @@ public class JobManagerConfiguration {
                 .handle(jobLaunchingGateway)
                 .log(LoggingHandler.Level.WARN, "headers.id + ': ' + payload")
                 .get();
+    }
+
+    private Path createFileDirectories(String fileDirectory) throws IOException {
+        Path pathFile = Paths.get(this.homepath + fileDirectory);
+        if(Files.notExists(pathFile)) {
+            Files.createDirectories(pathFile);
+        }
+        return pathFile;
     }
 
     @Bean

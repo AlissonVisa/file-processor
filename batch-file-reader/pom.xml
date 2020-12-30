@@ -19,6 +19,7 @@
 		<activemq.version>5.15.14</activemq.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<system.owner.userName>root</system.owner.userName>
 	</properties>
 
 	<dependencies>
@@ -109,6 +110,7 @@
 					<tag>${project.version}</tag>
 					<buildArgs>
 						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+						<SYSTEM_OWNER_USERNAME>${system.owner.userName}</SYSTEM_OWNER_USERNAME>
 					</buildArgs>
 				</configuration>
 			</plugin>
