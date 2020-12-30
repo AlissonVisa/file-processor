@@ -105,7 +105,7 @@ docker cp file-reader:/app/file-input/data/out/ $HOME/data/out/
 
 Os comandos acima assumem que o nome do container da aplicação `batch-file-reader`, seja `file-reader`
 
-Esse problema está relacionado a alguma incompatibilidade entre o volume criado e as pastas do container. Vale se atentar ao comando `mvn package -Dsystem.owner.userName=$USER` onde $USER é uma variável de ambiente contendo seu usuário local owner da máquina. Se o comando foi executado corretamente, recomenda-se parar o container e criá-lo novamente com o comando (na tentativa de sincronizar as pastas do volume `-v`):
+Esse problema está relacionado a alguma incompatibilidade entre o volume criado e as pastas do container. Vale se atentar ao comando `mvn package -Dsystem.owner.userName=$USER` onde $USER é uma variável de ambiente contendo seu usuário local logado na máquina. Se o comando foi executado corretamente, recomenda-se parar o container e criá-lo novamente com o comando (na tentativa de sincronizar as pastas do volume `-v`):
 
 ```
 docker stop file-reader
