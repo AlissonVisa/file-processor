@@ -87,7 +87,7 @@ Verifique se dentro da pasta `~/data` foram criadas as patas `in` e `out`. Caso 
 Para processar arquivos inclua-os na pasta `$HOME/data/in`, com a extensão `.dat`.
 O resultado do arquivo processado deverá aparecer em `$HOME/data/out` com final `.done.dat`
 
-### Troubleshooting
+## Troubleshooting
 
 Não é recomendado o uso de Docker no Windows para esse cenário.
 Caso os diretórios da aplicação `file-reader`, não sincronizem com seu sistema local de arquivos, deve-se adicionar o arquivo diretamente no container docker.
@@ -108,6 +108,8 @@ Os comandos acima assumem que o nome do container da aplicação `batch-file-rea
 Esse problema está relacionado a alguma incompatibilidade entre o volume criado e as pastas do container. Vale se atentar ao comando `mvn package -Dsystem.owner.userName=$USER` onde $USER é uma variável de ambiente contendo seu usuário local logado na máquina. Se o comando foi executado corretamente, recomenda-se parar o container e criá-lo novamente com o comando (na tentativa de sincronizar as pastas do volume `-v`):
 
 ```
+rm -r ~/data
+mkdir ~/data
 docker stop file-reader
 docker rm file-reader
 docker run --name file-reader --user $USER --network=host -e CHUNK_SIZE=120 -v $HOME/data:/app/file-input/data -d alissonvisa/batch-file-reader:0.0.1-SNAPSHOT
