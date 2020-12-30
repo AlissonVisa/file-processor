@@ -87,6 +87,19 @@ Verifique se dentro da pasta `~/data` foram criadas as pastas `in` e `out`. Caso
 Para processar arquivos inclua-os na pasta `$HOME/data/in`, com a extensão `.dat`.
 O resultado do arquivo processado deverá aparecer em `$HOME/data/out` com final `.done.dat`
 
+### Visualizando logs da aplicação
+
+Para acompanhar os logs de determinada aplicação execute:
+
+```
+docker logs -f <container_name>
+```
+Exemplos:
+```
+docker logs -f file-reader
+docker logs -f chunk-worker
+```
+
 ## Troubleshooting
 
 Não é recomendado o uso de Docker no Windows para esse cenário.
