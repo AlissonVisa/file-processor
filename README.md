@@ -94,17 +94,23 @@ Caso os diretórios da aplicação `file-reader`, não sincronizem com seu siste
 Para adicionar os arquivos no container docker da aplicação `file-reader`, para serem processados, execute:
 
 ```
-docker cp $HOME/data/in/meu_arquivo.dat file-reader:/app/file-input/data/in
+docker cp $HOME/data/in/* file-reader:/app/file-input/data/in/
 ```
 
-Assumindo que o nome do container da aplicação `batch-file-reader`, seja `file-reader`
+Para obter os arquivos de resultado, extraindo de dentro do container para seu sistema local de arquivos, execute:
 
-Recomenda-se parar o container e criá-lo novamente com o comando (na tentativa de sincronizar as pastas do volume `-v`):
+```
+docker cp file-reader:/app/file-input/data/out/ $HOME/data/out/
+```
+
+Os comandos acima assumem que o nome do container da aplicação `batch-file-reader`, seja `file-reader`
+
+Esse problema está relacionado a alguma incompatibilidade entre o volume criado e as pastas do container. Vale se atentar ao comando `mvn package -Dsystem.owner.userName=$USER` onde $USER é uma variável de ambiente contendo seu usuário local owner da máquina. Se o comando foi executado corretamente, recomenda-se parar o container e criá-lo novamente com o comando (na tentativa de sincronizar as pastas do volume `-v`):
 
 ```
 docker stop file-reader
 docker rm file-reader
-docker run --name file-reader --network=host -e CHUNK_SIZE=120 -v $HOME/data:/app/file-input/data alissonvisa/batch-file-reader:0.0.1-SNAPSHOT
+docker run --name file-reader --user $USER --network=host -e CHUNK_SIZE=120 -v $HOME/data:/app/file-input/data -d alissonvisa/batch-file-reader:0.0.1-SNAPSHOT
 ```
 
 ## Escalabilidade
