@@ -14,7 +14,7 @@ Comandos docker para o `Cassandra` e `ActiveMQ` (Execute no terminal, assumindo 
 
 ```
 docker run -p 9042:9042 --rm --name cassandra -d cassandra
-docker run -p 61616:61616 -p 8161:8161 rmohr/activemq
+docker run -p 61616:61616 -p 8161:8161 --rm --name activemq -d rmohr/activemq
 ```
 
 Após ter o banco `Cassandra` e o `ActiveMQ` rodando em sua máquina local, siga para o próximo passo.
@@ -24,13 +24,21 @@ Após ter o banco `Cassandra` e o `ActiveMQ` rodando em sua máquina local, siga
 Na raiz do projeto `k8s-file-processor`, dentro de cada uma das seguintes pastas:
 
 ```
-batch-file-chunk-worker, batch-file-reader, customer-api, sales-api e salesman-api
+batch-file-chunk-worker, customer-api, sales-api e salesman-api
 ```
+
 Execute no terminal:
 
 ```
 mvn package
 ```
+
+Exclusivamente para a aplicação batch-file-reader execute:
+
+```
+mvn package -Dsystem.owner.userName=$USER
+```
+
 ## Aplicações
 
 ### Batch File Reader `batch-file-reader`
@@ -56,17 +64,25 @@ Aplicação responsável por receber as linhas referêntes aos clientes, contida
 
 ## Deploy das aplicações
 
-Execute:
+Crie uma pasta chamada `data` na sua pasta `home`. Para isso execute:
 
 ```
-docker run --network=host alissonvisa/salesman-api:0.0.1-SNAPSHOT
-docker run --network=host alissonvisa/sales-api:0.0.1-SNAPSHOT
-docker run --network=host alissonvisa/customer-api:0.0.1-SNAPSHOT
-docker run --network=host alissonvisa/batch-file-chunk-worker:0.0.1-SNAPSHOT
-docker run --name file-reader --network=host -e CHUNK_SIZE=120 -v $HOME/data:/app/file-input/data alissonvisa/batch-file-reader:0.0.1-SNAPSHOT
+mkdir ~/data
+```
+
+Em seguida execute cada uma das linhas abaixo:
+
+```
+docker run --network=host --name salesman-api -d alissonvisa/salesman-api:0.0.1-SNAPSHOT
+docker run --network=host --name sales-api -d alissonvisa/sales-api:0.0.1-SNAPSHOT
+docker run --network=host --name customer-api -d alissonvisa/customer-api:0.0.1-SNAPSHOT
+docker run --network=host --name chunk-worker -d alissonvisa/batch-file-chunk-worker:0.0.1-SNAPSHOT
+docker run --name file-reader --user $USER --network=host -e CHUNK_SIZE=120 -v $HOME/data:/app/file-input/data -d alissonvisa/batch-file-reader:0.0.1-SNAPSHOT
 ```
 
 ### Processando Arquivos
+
+Verifique se dentro da pasta `~/data` foram criadas as patas `in` e `out`. Caso não tenha sido verifique a sessão `Troubleshooting`.
 
 Para processar arquivos inclua-os na pasta `$HOME/data/in`, com a extensão `.dat`.
 O resultado do arquivo processado deverá aparecer em `$HOME/data/out` com final `.done.dat`
@@ -95,4 +111,12 @@ docker run --name file-reader --network=host -e CHUNK_SIZE=120 -v $HOME/data:/ap
 
 #### Todas as aplicações aceitam réplicas, exceto a `file-reader` que deve rodar somente em 1 instância.
 Recomanda-se que utilize pelo menos 3 réplicas ou mais, da aplicação `batch-file-chunk-worker`. Porém, funciona normalmente com apenas 1 instância.
+
+## Comandos Úteis
+
+Parar todos os containers docker:
+
+```
+docker container stop $(docker container ls -aq)
+```
 
