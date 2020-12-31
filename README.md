@@ -82,7 +82,7 @@ docker run --name file-reader --user $USER --network=host -e CHUNK_SIZE=120 -v $
 
 ### Processando Arquivos
 
-Verifique se dentro da pasta `~/data` foram criadas as pastas `in` e `out`. Caso não tenham sido criadas como o esperado, verifique a sessão `Troubleshooting`.
+Verifique se dentro da pasta `~/data` foram criadas automaticamente as pastas `in` e `out`. Caso não tenham sido criadas como o esperado, verifique a sessão `Troubleshooting`.
 
 Para processar arquivos inclua-os na pasta `$HOME/data/in`, com a extensão `.dat`.
 O resultado do arquivo processado deverá aparecer em `$HOME/data/out` com final `.done.dat`
