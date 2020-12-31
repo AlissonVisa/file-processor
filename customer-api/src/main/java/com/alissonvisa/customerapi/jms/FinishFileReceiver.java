@@ -33,12 +33,17 @@ public class FinishFileReceiver implements SessionAwareMessageListener<TextMessa
         log.info("finish queue received message='{}'", messageText);
         final Long countCustomer = this.customerService.countCustomerByArchive(messageText);
 
+        final TextMessage responseMessage = getResponseMessage(message, countCustomer);
+
+        final MessageProducer producer = session.createProducer(message.getJMSReplyTo());
+        producer.send(responseMessage);
+    }
+
+    protected TextMessage getResponseMessage(TextMessage message, Long countCustomer) throws JMSException {
         final TextMessage responseMessage = new ActiveMQTextMessage();
         responseMessage.setJMSCorrelationID(message.getJMSCorrelationID());
         responseMessage.setText(String.format(
                 "Quantidade de clientes no arquivo de entrada=%s", countCustomer));
-
-        final MessageProducer producer = session.createProducer(message.getJMSReplyTo());
-        producer.send(responseMessage);
+        return responseMessage;
     }
 }

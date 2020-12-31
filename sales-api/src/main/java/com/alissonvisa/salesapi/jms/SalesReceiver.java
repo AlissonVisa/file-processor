@@ -46,7 +46,7 @@ public class SalesReceiver implements SessionAwareMessageListener<TextMessage> {
             message.acknowledge();
         } catch (Exception e) {
             log.error("sales failing, exception='{}', message='{}' on '{}'", e.getMessage(), message.getText(), Thread.currentThread().getName());
-            if(redeliveryCount > maximumRedelivery) {
+            if(redeliveryCount > getMaximumRedelivery()) {
                 log.warn("sales failing for the last time, exception='{}', message='{}' on '{}'", e.getMessage(), message.getText(), Thread.currentThread().getName());
                 reply(Boolean.FALSE, responseMessage, producer);
             }
@@ -56,8 +56,12 @@ public class SalesReceiver implements SessionAwareMessageListener<TextMessage> {
 
     }
 
-    private void reply(Boolean status, TextMessage responseMessage, MessageProducer producer) throws JMSException {
+    protected void reply(Boolean status, TextMessage responseMessage, MessageProducer producer) throws JMSException {
         responseMessage.setText(status.toString());
         producer.send(responseMessage);
+    }
+
+    protected Integer getMaximumRedelivery() {
+        return maximumRedelivery;
     }
 }

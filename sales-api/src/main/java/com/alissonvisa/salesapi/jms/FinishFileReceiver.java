@@ -35,13 +35,18 @@ public class FinishFileReceiver implements SessionAwareMessageListener<TextMessa
         final String worstSalesman = this.saleService.getWorstSalesman(messageText);
         final Sale bestSale = this.saleService.getBestSale(messageText);
 
+        final TextMessage responseMessage = getResponseMessage(message, worstSalesman, bestSale);
+
+        final MessageProducer producer = session.createProducer(message.getJMSReplyTo());
+        producer.send(responseMessage);
+    }
+
+    protected TextMessage getResponseMessage(TextMessage message, String worstSalesman, Sale bestSale) throws JMSException {
         final TextMessage responseMessage = new ActiveMQTextMessage();
         responseMessage.setJMSCorrelationID(message.getJMSCorrelationID());
         responseMessage.setText(String.format(
                 "ID da venda mais cara=%s\n" +
                 "O pior vendedor=%s\n", bestSale.getId(), worstSalesman));
-
-        final MessageProducer producer = session.createProducer(message.getJMSReplyTo());
-        producer.send(responseMessage);
+        return responseMessage;
     }
 }

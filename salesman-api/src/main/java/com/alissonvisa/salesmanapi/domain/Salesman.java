@@ -1,10 +1,8 @@
 package com.alissonvisa.salesmanapi.domain;
 
-import lombok.extern.log4j.Log4j2;
-
 import java.math.BigDecimal;
+import java.util.Objects;
 
-@Log4j2
 public class Salesman {
 
     private String importArchive;
@@ -19,7 +17,7 @@ public class Salesman {
         this.salary = salary;
     }
 
-    public Salesman(String importArchive, String name, BigDecimal totalSold) {
+    public Salesman(String importArchive, String name) {
         this.importArchive = importArchive;
         this.name = name;
     }
@@ -42,4 +40,16 @@ public class Salesman {
 
     private Salesman() {}
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Salesman salesman = (Salesman) o;
+        return Objects.equals(importArchive, salesman.importArchive) && Objects.equals(name, salesman.name) && Objects.equals(cpf, salesman.cpf) && Objects.equals(salary, salesman.salary);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(importArchive, name, cpf, salary);
+    }
 }

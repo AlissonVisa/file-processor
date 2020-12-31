@@ -3,6 +3,7 @@ package com.alissonvisa.salesapi.domain;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Sale {
 
@@ -58,4 +59,17 @@ public class Sale {
     }
 
     private Sale() {}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Sale sale = (Sale) o;
+        return Objects.equals(id, sale.id) && Objects.equals(salesmanName, sale.salesmanName) && Objects.equals(totalSaleValue, sale.totalSaleValue) && Objects.equals(archiveName, sale.archiveName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, salesmanName, totalSaleValue, archiveName);
+    }
 }

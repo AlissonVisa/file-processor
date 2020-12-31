@@ -1,5 +1,7 @@
 package com.alissonvisa.customerapi.domain;
 
+import java.util.Objects;
+
 public class Customer {
 
     private String cnpj;
@@ -30,5 +32,18 @@ public class Customer {
 
     public String getImportArchive() {
         return importArchive;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Customer customer = (Customer) o;
+        return Objects.equals(cnpj, customer.cnpj) && Objects.equals(name, customer.name) && Objects.equals(businessArea, customer.businessArea) && Objects.equals(importArchive, customer.importArchive);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cnpj, name, businessArea, importArchive);
     }
 }
