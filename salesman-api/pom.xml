@@ -17,7 +17,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<activemq.version>5.15.14</activemq.version>
-		<surefire-provider.version>1.0.1</surefire-provider.version>
+		<docker-plugin.version>1.4.13</docker-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -114,11 +114,18 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
 				<dependencies>
+					<!--Custom provider and engine for Junit 5 to surefire-->
 					<dependency>
 						<groupId>org.junit.platform</groupId>
 						<artifactId>junit-platform-surefire-provider</artifactId>
-						<version>${surefire-provider.version}</version>
+						<version>1.0.1</version>
+					</dependency>
+					<dependency>
+						<groupId>org.junit.jupiter</groupId>
+						<artifactId>junit-jupiter-engine</artifactId>
+						<version>5.6.2</version>
 					</dependency>
 				</dependencies>
 			</plugin>
